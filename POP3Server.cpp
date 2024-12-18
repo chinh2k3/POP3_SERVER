@@ -28,13 +28,15 @@ void POP3Server::initCmd(){
 //Đọc dữ liệu từ bên client
 int POP3Server::readCmd(TcpSocket& client,string& cmdLine){
     try{
-        char cmdBuffer[256];
-        int byteRead = client.recvLine(cmdBuffer,256);
+        char cmdBuffer[256];//tạo 1 mảng bộ nhớ đệm để lưu dữ liệu nhận
+        int byteRead = client.recvLine(cmdBuffer,256);//nhận dữ liệu gửi đến từ bên client
+
+        // Nếu đọc được ít nhất 2 byte (giả sử là chuỗi có ký tự kết thúc dòng CRLF "\r\n")
         if(byteRead >=2){
-            cmdBuffer[byteRead-2]=0;
-            cmdLine = cmdBuffer;
+            cmdBuffer[byteRead-2]=0;//loại bỏ /r/n ở cuối dòng
+            cmdLine = cmdBuffer;//chuyển dữ liệu từ buffer sang string
         }
-        return byteRead;
+        return byteRead;//trả về tổng số byte được nhận
 
     }catch(SocketException& ex){
         cerr<<ex.what()<<endl;
@@ -43,14 +45,16 @@ int POP3Server::readCmd(TcpSocket& client,string& cmdLine){
 
 }
 unsigned short POP3Server::parseCmd(const string& cmdLine, string cmd_argv[], int& cmd_argc){
-    cmd_argc=0;
-    cmd_argv[cmd_argc].clear();
-    istringstream iss(cmdLine);//cắt chuỗi
-    while(cmd_argc<2 && iss.good()){
-        iss>>cmd_argv[cmd_argc];
-        cmd_argc++;
+    cmd_argc=0;//số lượng tham số lệnh
+    cmd_argv[cmd_argc].clear();//làm trống mảng chứa tham số
+
+    istringstream iss(cmdLine);//cắt chuỗi lệnh và tham số
+    while(cmd_argc<2 && iss.good()){//lặp tối đa 2 lần
+        iss>>cmd_argv[cmd_argc];//truyền vào lệnh và tham số
+        cmd_argc++;//tăng biến đếm trong mảng
     }
-    // check command name and return command ID
+
+    //Kiểm tra lệnh nhập vào có trùng với lệnh trong NameList không
      if(cmd_argc>0 && !cmd_argv[0].empty())
     {
         for(int i = 0; i<this->numCmd; i++)
@@ -62,16 +66,17 @@ unsigned short POP3Server::parseCmd(const string& cmdLine, string cmd_argv[], in
     return SERVER_CMD_UNKNOWN;
 }
 void POP3Server ::startNewSession(TcpSocket client){
+    //Tạo 1 session mới
     POP3ServerSession* session = new POP3ServerSession(client,conf);
     string cmdLine;
     string cmdArgv[SERVER_CMD_ARG_NUM];
-    int cmdArgc;  // number of command arguments
-    unsigned short cmdId; // ID of command
-    int cmdLen; // length of a SMTP command
+    int cmdArgc;
+    unsigned short cmdId;
+    int cmdLen;
     try
     {
         client.send(POP3Server_GREETING);
-        while(!session->isQuit())
+        while(!session->isQuit())//Session không đóng
         {
             // Nhan lenh
             cmdLen = readCmd(client,cmdLine);

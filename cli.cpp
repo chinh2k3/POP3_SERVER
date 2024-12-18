@@ -75,10 +75,10 @@ unsigned short CmdLineInterface::parseCmd(const string& cmd, string cmd_argv[], 
 
     if(!cmd.empty())
     {
-        istringstream iss(cmd);
+        istringstream iss(cmd);//tách lệnh
         while(iss.good() && cmd_argc < CMD_MAX_ARG_NUM)
         {
-            iss >> cmd_argv[cmd_argc++];
+            iss >> cmd_argv[cmd_argc++];//truyền lệnh vừa tách vào
         }
     }
 
@@ -86,8 +86,8 @@ unsigned short CmdLineInterface::parseCmd(const string& cmd, string cmd_argv[], 
     {
         for(unsigned short i = 0; i<this->numCommands; i++)
         {
-            if(cmd_argv[0]==cmdNameList[i])
-                return i;
+            if(cmd_argv[0]==cmdNameList[i])//kiểm tra xem lệnh vừa tách có giống trong danh sách không
+                return i;//trả về vị trí của lệnh trong danh sách
         }
         if(cmd_argv[0]==CMD_QUIT_NAME)
             return CMD_QUIT_ID;
@@ -126,7 +126,7 @@ void CmdLineInterface::doCmd(unsigned short id, string cmd_argv[], int cmd_argc)
     }
     else
     {
-        CLI_CMD_FUNC f = this->cmdDoFunc[id];
+        CLI_CMD_FUNC f = this->cmdDoFunc[id];//Lấy thông tin lênh cần thực hiện thông qua id
         if(f!=NULL)
             (this->*f)(cmd_argv, cmd_argc);
     }

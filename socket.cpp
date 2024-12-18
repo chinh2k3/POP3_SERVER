@@ -59,20 +59,20 @@ const char *SocketException::what() const throw()
 }
 
 // Function to fill in address structure given an address and port
-void fillAddr(const string &address, unsigned short port,
-              sockaddr_in &addr)
+void fillAddr(const string &address, unsigned short port, sockaddr_in &addr)
 {
-    memset(&addr, 0, sizeof(addr)); // Zero out address structure
-    addr.sin_family = AF_INET;      // Internet address
+    memset(&addr, 0, sizeof(addr)); // Zero out address structure(Xóa sạch bộ nhớ của cấu trúc memset)
+    addr.sin_family = AF_INET;      // Internet address (Đặt kiểu địa chỉ IPv4)
 
-    hostent *host; // Resolve name
+    hostent *host; // Resolve name(phân giải tên miền hoặc IP)
     if ((host = gethostbyname(address.c_str())) == NULL)
     {
         // strerror() will not work for gethostbyname() and hstrerror()
         // is supposedly obsolete
+        // nếu getHostByName thất bại ném ra ngoại lệ
         throw SocketException("Failed to resolve name (gethostbyname())");
     }
-    addr.sin_addr.s_addr = *((unsigned long *)host->h_addr_list[0]);
+    addr.sin_addr.s_addr = *((unsigned long *)host->h_addr_list[0]);//lấy địa chỉ từ kết quả phân giải
 
     addr.sin_port = htons(port); // Assign port in network byte order
 }
@@ -106,7 +106,7 @@ keepAlive = false;
 
 Socket::Socket(int sockDesc)
 {
-    keepAlive = false;
+    keepAlive = false;//Tắt tính năng(keepAlive đảm bảo rằng kết nối k bị ngắt khi có dữ liệu truyền qua)
     this->sockDesc = sockDesc;
 }
 
@@ -120,7 +120,7 @@ Socket::Socket(const Socket& sock)
 void Socket::operator=(const Socket& sock)
 {
     //keepAlive = sock.keepAlive;
-    sockDesc = sock.sockDesc;
+    sockDesc = sock.sockDesc;//sockDesc là 1 thứ được cấp khi tạo được kết nối socket
     //sock.keepAlive = true;
 }
 
@@ -168,7 +168,7 @@ void Socket::startUp()
 string Socket::getLocalAddress()
 {
     sockaddr_in addr;
-    unsigned int addr_len = sizeof(addr);
+    unsigned int addr_len = sizeof(addr);//xác định kích thước của cấu trúc địa chỉ
 
     if (getsockname(sockDesc, (sockaddr *)&addr, (socklen_t *)&addr_len) < 0)
     {
@@ -193,12 +193,12 @@ void Socket::setLocalPort(unsigned short localPort)
 {
     // Bind the socket to its port
     sockaddr_in localAddr;
-    memset(&localAddr, 0, sizeof(localAddr));
-    localAddr.sin_family = AF_INET;
-    localAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    localAddr.sin_port = htons(localPort);
+    memset(&localAddr, 0, sizeof(localAddr));//xóa sạch mọi bộ nhớ
+    localAddr.sin_family = AF_INET;//sử dụng giao thức IPv4
+    localAddr.sin_addr.s_addr = htonl(INADDR_ANY);//Lắng nghe trên mọi địa chỉ cục bộ
+    localAddr.sin_port = htons(localPort);//Đặt cổng chuyển đổi sang byte order mạng
 
-    if (bind(sockDesc, (sockaddr *)&localAddr, sizeof(sockaddr_in)) < 0)
+    if (bind(sockDesc, (sockaddr *)&localAddr, sizeof(sockaddr_in)) < 0)//Liên kết sockDesc với địa chỉ và cổng được chỉ định trong localAddress
     {
         throw SocketException("Set of local port failed (bind())", true);
     }
@@ -209,7 +209,7 @@ void Socket::setLocalAddressAndPort(const string &localAddress,
 {
     // Get the address of the requested host
     sockaddr_in localAddr;
-    fillAddr(localAddress, localPort, localAddr);
+    fillAddr(localAddress, localPort, localAddr);//Dịch địa chỉ ip hoặc tên miền thành mã nhị phân
 
     if (bind(sockDesc, (sockaddr *)&localAddr, sizeof(sockaddr_in)) < 0)
     {

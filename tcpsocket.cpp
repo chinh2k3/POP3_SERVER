@@ -87,8 +87,7 @@ bool TcpSocket::isAlive()
 }
 
 
-void TcpSocket::connect(const string &remoteAddress,
-                        unsigned short port)
+void TcpSocket::connect(const string &remoteAddress, unsigned short port)
 {
     // Get the address of the requested host
     sockaddr_in destAddr;
@@ -109,8 +108,7 @@ void TcpSocket::connect(const string &remoteAddress,
     }
 }
 
-void TcpSocket::connect(const string &remoteAddress,
-                        const string& service)
+void TcpSocket::connect(const string &remoteAddress, const string& service)
 {
     // Get the address of the requested host
     sockaddr_in destAddr;
@@ -145,6 +143,10 @@ void TcpSocket::connect(const string &remoteAddress,
 int TcpSocket::send(const void *buffer, int bufferLen)
 {
     int r = ::send(sockDesc, (raw_type *) buffer, bufferLen, 0);
+    /*sockDesc: Mô tả socket liên kết với kết nối TCP.
+    buffer: Con trỏ đến dữ liệu cần gửi.
+    bufferLen: Số byte cần gửi từ buffer.
+    flag=0*/
     if ( r < 0)
     {
         throw SocketException("Send failed (send())", true);

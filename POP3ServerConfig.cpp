@@ -1,5 +1,15 @@
 #include<bits/stdc++.h>
 #include "POP3ServerConfig.h"
+POP3ServerAccount::POP3ServerAccount(){
+}
+POP3ServerAccount::~POP3ServerAccount(){
+}
+POP3ServerAccount::POP3ServerAccount(string username,string password):Account(username,password){
+}
+string POP3ServerAccount::getUserName(){
+    return this->username;
+}
+
 POP3ServerConfig::POP3ServerConfig(){
 
 }

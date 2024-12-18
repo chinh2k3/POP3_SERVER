@@ -61,11 +61,11 @@ bool TCPServer::start()
 {
     try
     {
-        this->master.setListen(this->port);
-        running = true;
+        this->master.setListen(this->port);//lắng nghe kết nối
+        running = true;//Bắt đầu chạy
         // create a thread to run TCPServer::run
-        std::thread t(&TCPServer::run,this);
-        t.detach();
+        std::thread t(&TCPServer::run,this);//tạo 1 luồng mới để thực thi phương thức run của server
+        t.detach();//tách luồng chạy độc lập
         return running;
         //this->run();
     }

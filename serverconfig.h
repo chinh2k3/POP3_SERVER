@@ -25,10 +25,13 @@ private:
 public:
     Account();
     virtual ~Account();
-    Account(const string& username);
+    Account(const string& username,const string& password);
     const string& getUserName() const
     {
         return this->username;
+    }
+    const string& getPassWord() const{
+        return this->password;
     }
     void setUserName(const string& username)
     {
@@ -89,6 +92,7 @@ public:
     void addAccount(Account* acc);
     Account* getAccount(const string& username);
     bool isValidUser(const string& username);
+    bool isValidPassWord(const string& password);
     bool authenticate(const string& username, const string& password);
     //Account* getAccount(int index);
     void removeAccount(const string& username);

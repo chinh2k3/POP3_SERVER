@@ -25,19 +25,22 @@ Account::~Account()
 
 }
 
-Account::Account(const string& user)
+Account::Account(const string& user,const string& password)
 {
     this->username = user;
+    this->password = password;
 }
 
 void ServerConfig::addAccount(Account* acc)
 {
     string username = acc->getUserName();
+    string password = acc->getPassWord();
     if(!username.empty())
     {
         try
         {
             accMap.insert({username,acc});
+            accMap.insert({password,acc});
         }
         catch (exception& e)
         {
@@ -78,7 +81,9 @@ bool ServerConfig::isValidUser(const string& username)
 {
     return !(accMap.find(username)==accMap.end());
 }
-
+bool ServerConfig::isValidPassWord(const string& password){
+    return !(accMap.find(password)==accMap.end());
+}
 bool ServerConfig::authenticate(const string& username, const string& pass)
 {
     try

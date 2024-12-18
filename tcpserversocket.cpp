@@ -1,4 +1,4 @@
-#ifdef _WIN32
+ #ifdef _WIN32
 #include <winsock2.h>         // For socket(), connect(), send(), and recv()
 #include <ws2tcpip.h>
 typedef int socklen_t;
@@ -37,8 +37,7 @@ TcpServerSocket::TcpServerSocket(unsigned short localPort, int queueLen):Socket(
     listen(queueLen);
 }
 
-TcpServerSocket::TcpServerSocket(const string &localAddress,
-                                 unsigned short localPort, int queueLen): Socket(SOCK_STREAM, IPPROTO_TCP)
+TcpServerSocket::TcpServerSocket(const string &localAddress, unsigned short localPort, int queueLen): Socket(SOCK_STREAM, IPPROTO_TCP)
 {
 #ifdef __linux__
     int reusePort = 1;

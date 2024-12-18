@@ -11,6 +11,7 @@ POP3ServerSession::POP3ServerSession(const TcpSocket& slave,ServerConfig* conf):
     this->info = new POP3ServerSessionInfo();
     this->quitSession = false;
     this->info->status = STATUS_INIT;
+    this->conf = new POP3ServerConfig();
 }
 
 void POP3ServerSession::reset()
@@ -48,13 +49,14 @@ void POP3ServerSession::doUser(string cmd_argv[],int cmd_argc){
         while(getline(user,line)){
             stringstream iss(line);
             iss>>username>>password;
-            if(cmd_argv[1]==username){
+            account = new POP3ServerAccount(username,password);
+            conf->addAccount(account);
+            if(conf->isValidUser(cmd_argv[1])){
                 response = "+OK "+username+" is a valid mailbox\r\n";
+                logUserName=username;
                 slave.send(response);
-                logUserName = username;//gán giá trị user tìm được vào biến logUserName
-                logPassWord = password;//gán password tìm được vào biến logPassWord
-                found=true;//nếu tìm thấy sẽ gán giá trị biến đánh dấu là true
-                break;//thoát khỏi vòng lặp tìm kiếm
+                found=true;
+                break;
             }
         }
         user.close();
@@ -71,12 +73,13 @@ void POP3ServerSession::doUser(string cmd_argv[],int cmd_argc){
 }
 void POP3ServerSession::doPassword(string cmd_argv[],int cmd_argc){
     if(cmd_argc==2){
-        if(cmd_argv[1]==logPassWord){//kiểm tra xem password nhập vào có trùng với logPassWord hay không
+        if(conf->authenticate(logUserName,cmd_argv[1])){//kiểm tra xem password nhập vào có trùng với logPassWord hay không
             response = "+OK Maildrop locked and ready\r\n";
             slave.send(response);
         }else{
              response =  "-ERR invalid password\r\n";
              slave.send(response);
+             slave.close();
         }
     }
     else{
@@ -211,6 +214,7 @@ void POP3ServerSession::doDelete(string cmd_argv[],int cmd_argc)
                 delemail=email;//Gán dữ liêu của file cần đánh dấu vào biến tạm
                 deleuser = username;//Gán dữ liêu của file cần đánh dấu vào biến tạm
                 deleid = id;//Gán dữ liêu của file cần đánh dấu vào biến tạm
+
             }
         }
         deleMail<<deleid<<" "<<deleuser<<" "<<delemail<<"\n";//đẩy file cần đánh dấu vào file xóa
@@ -282,6 +286,7 @@ void POP3ServerSession::doQuit(string cmd_argv[], int cmd_argc)
         if(rename("temp.txt","email.txt")==0){//đổi tên file
             response = "+OK POP3 Server signing off\r\n";
             slave.send(response);
+            slave.close();
         }else{
             response = "Fail\r\n";
             slave.send(response);

@@ -19,12 +19,15 @@ struct POP3ServerSessionInfo
 class POP3ServerSession : public Session
 {
     POP3ServerSessionInfo* info;
+    Account* account;
     string response;
     string logUserName;
     string logPassWord;
+    string loginID;
     void reset();
     string processString(string s);
     POP3ServerConfig* getPOP3ServerConfig(){return (POP3ServerConfig*)conf;}
+
 public:
     POP3ServerSession(const TcpSocket& slave,ServerConfig* conf);
     ~POP3ServerSession();
